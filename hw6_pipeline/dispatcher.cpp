@@ -25,9 +25,6 @@ int main() {
         execve("./consumer", NULL, NULL);
     }
     
-    cout << pid1;
-    sleep(5);
-    
     kill(pid1, SIGTERM);
     waitpid(pid1, &status, WEXITED);
     cerr << "child[" << pid1 << "] exited with status " << status << endl;
