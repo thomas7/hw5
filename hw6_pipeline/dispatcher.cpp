@@ -7,9 +7,9 @@
 using namespace std;
 
 int main() {
-
-    int status = 0;
     int pipefd[2];
+    int status = 0;
+    pipe(pipefd);
     pid_t pid1, pid2;
     pid1 = fork();
     
@@ -19,6 +19,9 @@ int main() {
         execve("./generator", NULL, NULL);
     }
     
+    else
+        close(pipefd[1]);
+            
     pid2 = fork();    
     if(pid2 == 0) { // this is the child process
         dup2 (pipefd[0], 0); //redirect input to read end of pipe
@@ -26,13 +29,16 @@ int main() {
         execve("./consumer", NULL, NULL);
     }
     
+    else
+        close(pipefd[0]);
+    
     sleep(1);
     
     kill(pid1, SIGTERM);
     waitpid(pid1, &status, WSTOPPED);
     cerr << "child[" << pid1 << "] exited with status " << status << endl;
     
-    waitpid(pid2, &status, WSTOPPED);
+    waitpid(pid2, &status, WEXITED);
     cerr << "child[" << pid2 << "] exited with status " << status << endl;
         
 return 0;
